@@ -11,11 +11,11 @@
 #include "redo.h"
 #include "util.h"
 
-int fexec(char *const redoscript, char *const target){
+int fexec(char *const redoscript, char *const target, char *const targetBasename){
     int pid = fork();
     if(pid == 0){
         /* child */
-        char *const args[] = {SH, "-x", redoscript, "-", "-", target, NULL};
+        char *const args[] = {SH, "-x", redoscript, "-", targetBasename, target, NULL};
         int e;
 
         execvp(SH, args);
@@ -51,6 +51,7 @@ int redo(char *const target){
     int ret;
 
     /* compute target basename related fields */
+    targetBasename = basenameNoExt(target);
     ext = xextension(target);
     len = strlen(target), elen = strlen(ext);
 
@@ -70,7 +71,7 @@ int redo(char *const target){
     strncat(ddoFile, DO_EXT, strlen(DO_EXT));
 
     /* DEBUG */
-    printf("ext=%s,target=%s,doFile=%s,ddoFile=%s\n", ext, target, doFile, ddoFile);
+    printf("targetBasename=%s,ext=%s,target=%s,doFile=%s,ddoFile=%s\n", targetBasename, ext, target, doFile, ddoFile);
 
     /* check if doFile exists */
     /* TODO: refactor this into its own function */
@@ -89,7 +90,7 @@ int redo(char *const target){
         strncat(redoTarget, target  , strlen(target));
         strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
 
-        ret = fexec(doFile, redoTarget);
+        ret = fexec(doFile, redoTarget, targetBasename);
         if(ret == 0){
             ret = rename(redoTarget, target);
             if(ret) perror("rename");
