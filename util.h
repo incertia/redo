@@ -3,10 +3,19 @@
 
 typedef int BOOL;
 
-/* gets the name without a directory or extension */
+/* gets the basename without extension */
 char *basenameNoExt(const char *const path);
+
+/* gets the basename with extension */
+char *xbasename(const char *const path);
+
+/* true if the basename has an extension */
 BOOL hasExtention(const char *const path);
-char *extension(const char *const path);
+
+/* gets the extension from path */
 char *xextension(const char *const path);
+
+/* removes the extension from path */
+char *removeExtension(const char *const path);
 
 #endif /* #ifndef __UTIL_H__ */

@@ -4,36 +4,40 @@
 #include "redo.h"
 #include "util.h"
 
+/* gets the basename without extension */
 char *basenameNoExt(const char *const path){
-    ssize_t i = strlen(path) - 1;
-    char *bn = NULL;
-    for(; i >= 0; i--) if(path[i] == '/') break;
-    bn = strdup(path + i + 1);
-    i = strlen(bn) - 1;
-    for(; i >= 0; i--){
-        if(bn[i] == '.'){
-            bn[i] = '\0';
-            break;
-        }
-    }
-    return bn;
+    char *basename = xbasename(path);
+    char *ret = removeExtension(basename);
+    free(basename);
+    return ret;
 }
 
+/* gets the basename with extension */
+char *xbasename(const char *const path){
+    char *b = strrchr(path, '/');
+    return b ? strdup(b + 1) : strdup(path);
+}
+
+/* true if the basename has an extension */
 BOOL hasExtension(const char *const path){
-    ssize_t i = strlen(path) - 1;
-    for(; i >= 0; i--) if(path[i] == '.') return TRUE;
-    return FALSE;
+    const char *b = strrchr(path, '/');
+    b = b ? b : path;
+    return strchr(b, '.') != NULL;
 }
 
-char *extension(const char *const path){
-    ssize_t i = strlen(path) - 1;
-    for(; i >= 0; i--) if(path[i] == '.') return strdup(path + i);
-    return strdup("");
-}
-
+/* gets the extension from path */
 char *xextension(const char *const path){
-    char *s = strdup(path);
-    ssize_t i = strlen(s) - 1;
-    for(; i >= 0; i--) if(s[i] == '.'){ s[i] = '\0'; break; }
-    return s;
+    char *basename = xbasename(path);
+    char *dot = strrchr(basename, '.');
+    dot = dot ? strdup(dot) : strdup("");
+    free(basename);
+    return dot;
+}
+
+/* removes the extension from path */
+char *removeExtension(const char *const path){
+    char *ret = strdup(path);
+    char *dot = strrchr(ret, '.');
+    if(dot) *dot = '\0';
+    return ret;
 }

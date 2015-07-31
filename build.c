@@ -51,8 +51,7 @@ int redo(char *const target){
     int ret;
 
     /* compute target basename related fields */
-    targetBasename = basenameNoExt(target);
-    ext = extension(target);
+    ext = xextension(target);
     len = strlen(target), elen = strlen(ext);
 
     /* compute doFile */
@@ -71,7 +70,7 @@ int redo(char *const target){
     strncat(ddoFile, DO_EXT, strlen(DO_EXT));
 
     /* DEBUG */
-    printf("basename=%s,ext=%s,target=%s,doFile=%s,ddoFile=%s\n", targetBasename, ext, target, doFile, ddoFile);
+    printf("ext=%s,target=%s,doFile=%s,ddoFile=%s\n", ext, target, doFile, ddoFile);
 
     /* check if doFile exists */
     /* TODO: refactor this into its own function */
@@ -84,11 +83,11 @@ int redo(char *const target){
             ret = 50;
         }
     } else {
-        ssize_t redoTargetLen = strlen(targetBasename) + strlen(REDO_EXT) + 1;
+        ssize_t redoTargetLen = strlen(target) + strlen(REDO_EXT) + 1;
         char *redoTarget = malloc(redoTargetLen * sizeof(char));
         memset(redoTarget, 0, redoTargetLen * sizeof(char));
-        strncat(redoTarget, targetBasename, strlen(targetBasename));
-        strncat(redoTarget, REDO_EXT      , strlen(REDO_EXT));
+        strncat(redoTarget, target  , strlen(target));
+        strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
 
         ret = fexec(doFile, redoTarget);
         if(ret == 0){
