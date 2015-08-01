@@ -1,5 +1,8 @@
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "redo.h"
 #include "util.h"
@@ -40,4 +43,15 @@ char *removeExtension(const char *const path){
     char *dot = strrchr(ret, '.');
     if(dot) *dot = '\0';
     return ret;
+}
+
+/* TRUE if the file at path exists */
+BOOL fileExists(const char *const path){
+    struct stat s;
+    if(stat(path, &s) == -1){
+        if(errno == ENOENT) return FALSE;
+        else return 2;
+    } else {
+        return TRUE;
+    }
 }

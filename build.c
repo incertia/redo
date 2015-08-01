@@ -2,14 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #include "build.h"
 #include "redo.h"
 #include "util.h"
+
+/* forward declares */
+static int build(char *const target, char *const redoTarget, char *const doFile, char *const basename);
 
 int fexec(char *const redoscript, char *const target, char *const targetBasename){
     int pid = fork();
@@ -45,9 +46,8 @@ int fexec(char *const redoscript, char *const target, char *const targetBasename
 }
 
 int redo(char *const target){
-    char *targetBasename, *ext, *doFile, *ddoFile;
-    ssize_t len, elen, doFileLen, ddoFileLen;
-    struct stat s;
+    char *targetBasename, *ext, *doFile, *ddoFile, *redoTarget;
+    ssize_t len, elen, doFileLen, ddoFileLen, redoTargetLen;
     int ret;
 
     /* compute target basename related fields */
@@ -73,23 +73,18 @@ int redo(char *const target){
     /* DEBUG */
     printf("targetBasename=%s,ext=%s,target=%s,doFile=%s,ddoFile=%s\n", targetBasename, ext, target, doFile, ddoFile);
 
-    /* check if doFile exists */
-    /* TODO: refactor this into its own function */
-    if(stat(doFile, &s) == -1){
-        int e = errno;
-        if(e == ENOENT){
-            fprintf(stderr, "error: %s: no such file or directory\n", doFile);
-            ret = redoDefault(target, doFile, ddoFile);
-        } else {
-            ret = 50;
-        }
-    } else {
-        ssize_t redoTargetLen = strlen(target) + strlen(REDO_EXT) + 1;
-        char *redoTarget = malloc(redoTargetLen * sizeof(char));
-        memset(redoTarget, 0, redoTargetLen * sizeof(char));
-        strncat(redoTarget, target  , strlen(target));
-        strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
+    /* compute build target */
+    redoTargetLen = strlen(target) + strlen(REDO_EXT) + 1;
+    redoTarget = malloc(redoTargetLen * sizeof(char));
+    memset(redoTarget, 0, redoTargetLen * sizeof(char));
+    strncat(redoTarget, target  , strlen(target));
+    strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
 
+    /* redo */
+    /* TODO: refactor this into its own function */
+    /* if(!fileExists(doFile)){
+        fprintf(stderr, "error: %s: no such file or directory\n", doFile);
+    } else {
         ret = fexec(doFile, redoTarget, targetBasename);
         if(ret == 0){
             ret = rename(redoTarget, target);
@@ -97,17 +92,45 @@ int redo(char *const target){
         } else {
             fprintf(stderr, "error: failed to build target %s\n", targetBasename);
         }
+    } */
 
-        free(redoTarget);
+    /* use doFile if it exists */
+    if(fileExists(doFile)){
+        printf("===redo %s===\n", doFile);
+        ret = build(target, redoTarget, doFile, targetBasename);
+    /* otherwise use ddoFile if it exists */
+    } else if(fileExists(ddoFile)){
+        printf("===redo %s===\n", ddoFile);
+        ret = build(target, redoTarget, ddoFile, targetBasename);
+    /* otherwise error */
+    } else {
+        fprintf(stderr, "error: No do file for target '%s'. Consider writing %s.do or %s%s.do.\n", target, target, DEFAULT, ext);
+        ret = 2;
     }
 
     /* free stuffs */
+    free(redoTarget);
     free(ddoFile);
     free(doFile);
     free(ext);
     free(targetBasename);
 
     return ret;
+}
+
+/* run the doFile with given parameters */
+static int build(char *const target, char *const redoTarget, char *const doFile, char *const basename){
+    if(!fileExists(doFile)){
+        fprintf(stderr, "error: %s: no such file or directory\n", doFile);
+        return -1;
+    } else {
+        int ret = fexec(doFile, redoTarget, basename);
+        if(ret == 0){
+            ret = rename(redoTarget, target);
+            if(ret) perror("rename");
+        }
+        return ret;
+    }
 }
 
 int redoDefault(const char *const target, const char *const doFile, const char *const ddoFile){

@@ -3,3 +3,4 @@ redo-ifchange
 redo-ifcreate
 redo-always
 *.swp
+*.o

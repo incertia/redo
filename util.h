@@ -18,4 +18,7 @@ char *xextension(const char *const path);
 /* removes the extension from path */
 char *removeExtension(const char *const path);
 
+/* TRUE if the file at path exists */
+BOOL fileExists(const char *const path);
+
 #endif /* #ifndef __UTIL_H__ */
