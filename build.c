@@ -12,7 +12,8 @@
 /* forward declares */
 static int build(char *const target, char *const redoTarget, char *const doFile, char *const basename);
 
-int fexec(char *const redoscript, char *const target, char *const targetBasename){
+/* exec do script with params */
+static int fexec(char *const redoscript, char *const target, char *const targetBasename){
     int pid = fork();
     if(pid == 0){
         /* child */
@@ -45,6 +46,7 @@ int fexec(char *const redoscript, char *const target, char *const targetBasename
     }
 }
 
+/* redo target */
 int redo(char *const target){
     char *targetBasename, *ext, *doFile, *ddoFile, *redoTarget;
     ssize_t len, elen, doFileLen, ddoFileLen, redoTargetLen;
@@ -79,20 +81,6 @@ int redo(char *const target){
     memset(redoTarget, 0, redoTargetLen * sizeof(char));
     strncat(redoTarget, target  , strlen(target));
     strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
-
-    /* redo */
-    /* TODO: refactor this into its own function */
-    /* if(!fileExists(doFile)){
-        fprintf(stderr, "error: %s: no such file or directory\n", doFile);
-    } else {
-        ret = fexec(doFile, redoTarget, targetBasename);
-        if(ret == 0){
-            ret = rename(redoTarget, target);
-            if(ret) perror("rename");
-        } else {
-            fprintf(stderr, "error: failed to build target %s\n", targetBasename);
-        }
-    } */
 
     /* use doFile if it exists */
     if(fileExists(doFile)){
@@ -131,8 +119,4 @@ static int build(char *const target, char *const redoTarget, char *const doFile,
         }
         return ret;
     }
-}
-
-int redoDefault(const char *const target, const char *const doFile, const char *const ddoFile){
-    return 1;
 }
