@@ -17,7 +17,7 @@ static int fexec(char *const redoscript, char *const target, char *const targetB
     int pid = fork();
     if(pid == 0){
         /* child */
-        char *const args[] = {SH, "-x", redoscript, "-", targetBasename, target, NULL};
+        char *const args[] = {SH, "-e", "-x", redoscript, "-", targetBasename, target, NULL};
         int e;
 
         execvp(SH, args);
