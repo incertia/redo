@@ -20,3 +20,28 @@ change the program that executes the do script.
 `/etc/rc.d/target.extension` would have basename `target`.
 * `$3` is the output file the script should produce. For example, `gcc -o $3
 src/$2.c`.
+
+## Building redo for the first time
+---
+
+Redo is theoretically self compiling, so the project itself is built with redo.
+However, should you need to build redo without a prior version, it is fairly
+easy to get it up and running.
+
+    # build a preliminary local version of redo
+    gcc -o bin/redo src/*.c
+    ln -sf redo bin/redo-ifchange
+    ln -sf redo bin/redo-ifcreate
+    ln -sf redo bin/redo-always
+
+    # get bin/ into path temporarily and save the oldpath
+    OLDPATH=$PATH
+    PATH=$PATH:./bin/
+
+    # use redo to build and install redo
+    redo redo && sudo redo install
+
+    # restore OLDPATH
+    PATH=$OLDPATH
+
+After that, you should have a working version of redo installed on your system.
