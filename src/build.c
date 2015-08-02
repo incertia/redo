@@ -114,8 +114,18 @@ static int build(char *const target, char *const redoTarget, char *const doFile,
     } else {
         int ret = fexec(doFile, redoTarget, basename);
         if(ret == 0){
+            int e;
             ret = rename(redoTarget, target);
-            if(ret) perror("rename");
+            e = errno; /* we should save this somewhere */
+            if(ret){
+                if(e == ENOENT){
+                    /* phony target */
+                    fprintf(stderr, "debug: phony target detected\n");
+                    ret = 0;
+                } else {
+                    perror("rename");
+                }
+            }
         }
         return ret;
     }
