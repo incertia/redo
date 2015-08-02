@@ -1,5 +1,4 @@
 # Redo
----
 
 This is my attempt at implementing DJB's [redo](http://cr.yp.to/redo.html).
 Semantics will be similar to Jekor's
@@ -11,7 +10,6 @@ this because as far as I can see, most of the time will be spent on `fork()` and
 maybe.
 
 ## Do script syntax
----
 
 * Do scripts must be executable with `sh`. An option will be added later to
 change the program that executes the do script.
@@ -22,7 +20,6 @@ change the program that executes the do script.
 src/$2.c`.
 
 ## Building redo for the first time
----
 
 Redo is theoretically self compiling, so the project itself is built with redo.
 However, should you need to build redo without a prior version, it is fairly
