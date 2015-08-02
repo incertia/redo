@@ -83,7 +83,7 @@ int redo(char *const target){
     strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
 
     /* use doFile if it exists */
-    if(fileExists(doFile)){
+    if(strlen(target) && fileExists(doFile)){
         printf("===redo %s===\n", doFile);
         ret = build(target, redoTarget, doFile, targetBasename);
     /* otherwise use ddoFile if it exists */
