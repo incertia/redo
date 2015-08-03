@@ -9,6 +9,9 @@ char *basenameNoExt(const char *const path);
 /* gets the basename with extension */
 char *xbasename(const char *const path);
 
+/* gets the directory leading up to path */
+char *xdirname(const char *const path);
+
 /* true if the basename has an extension */
 BOOL hasExtention(const char *const path);
 
@@ -20,5 +23,8 @@ char *removeExtension(const char *const path);
 
 /* TRUE if the file at path exists */
 BOOL fileExists(const char *const path);
+
+/* replaces the basename without extension */
+char *replaceBasename(const char *const path, const char *const basename);
 
 #endif /* #ifndef __UTIL_H__ */

@@ -3,4 +3,4 @@ bin/redo
 bin/redo-ifchange
 bin/redo-ifcreate
 bin/redo-always
-obj/
+obj/*.o

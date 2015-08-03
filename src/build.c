@@ -48,59 +48,61 @@ static int fexec(char *const redoscript, char *const target, char *const targetB
 
 /* redo target */
 int redo(char *const target){
-    char *targetBasename, *ext, *doFile, *ddoFile, *redoTarget;
-    ssize_t len, elen, doFileLen, ddoFileLen, redoTargetLen;
+    char *targetBasename, *doFile, *ddoFile, *redoTarget, *newname;
+    ssize_t len, doFileLen, ddoFileLen, redoTargetLen, newnameLen;
     int ret;
 
     /* compute target basename related fields */
     targetBasename = basenameNoExt(target);
-    ext = xextension(target);
-    len = strlen(target), elen = strlen(ext);
+    len = strlen(target);
 
     /* compute doFile */
     doFileLen = len + strlen(DO_EXT) + 1;
     doFile = malloc(doFileLen * sizeof(char));
     memset(doFile, 0, doFileLen * sizeof(char));
-    strncat(doFile, target, len);
-    strncat(doFile, DO_EXT, strlen(DO_EXT));
+    strcat(doFile, target);
+    strcat(doFile, DO_EXT);
+
+    /* base for ddoFile */
+    newname = replaceBasename(target, DEFAULT);
+    newnameLen = strlen(newname);
 
     /* compute ddoFile (default doFile) */
-    ddoFileLen = strlen(DEFAULT) + elen + strlen(DO_EXT) + 1;
+    ddoFileLen = newnameLen + strlen(DO_EXT) + 1;
     ddoFile = malloc(ddoFileLen * sizeof(char));
     memset(ddoFile, 0, ddoFileLen * sizeof(char));
-    strncat(ddoFile, DEFAULT, strlen(DEFAULT));
-    strncat(ddoFile, ext, elen);
-    strncat(ddoFile, DO_EXT, strlen(DO_EXT));
+    strcat(ddoFile, newname);
+    strcat(ddoFile, DO_EXT);
 
     /* DEBUG */
-    printf("targetBasename=%s,ext=%s,target=%s,doFile=%s,ddoFile=%s\n", targetBasename, ext, target, doFile, ddoFile);
+    printf("targetBasename=%s,target=%s,doFile=%s,ddoFile=%s\n", targetBasename, target, doFile, ddoFile);
 
     /* compute build target */
     redoTargetLen = strlen(target) + strlen(REDO_EXT) + 1;
     redoTarget = malloc(redoTargetLen * sizeof(char));
     memset(redoTarget, 0, redoTargetLen * sizeof(char));
-    strncat(redoTarget, target  , strlen(target));
-    strncat(redoTarget, REDO_EXT, strlen(REDO_EXT));
+    strcat(redoTarget, target  );
+    strcat(redoTarget, REDO_EXT);
 
+    /* redo */
+    printf("===redo %s===\n", target);
     /* use doFile if it exists */
     if(strlen(target) && fileExists(doFile)){
-        printf("===redo %s===\n", doFile);
         ret = build(target, redoTarget, doFile, targetBasename);
     /* otherwise use ddoFile if it exists */
     } else if(fileExists(ddoFile)){
-        printf("===redo %s===\n", ddoFile);
         ret = build(target, redoTarget, ddoFile, targetBasename);
     /* otherwise error */
     } else {
-        fprintf(stderr, "error: No do file for target '%s'. Consider writing %s.do or %s%s.do.\n", target, target, DEFAULT, ext);
+        fprintf(stderr, "error: No do file for target '%s'. Consider writing %s or %s.\n", target, doFile, ddoFile);
         ret = 2;
     }
 
     /* free stuffs */
     free(redoTarget);
     free(ddoFile);
+    free(newname);
     free(doFile);
-    free(ext);
     free(targetBasename);
 
     return ret;

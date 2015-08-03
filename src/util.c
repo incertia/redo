@@ -21,6 +21,15 @@ char *xbasename(const char *const path){
     return b ? strdup(b + 1) : strdup(path);
 }
 
+/* gets the directory leading up to path */
+char *xdirname(const char *const path){
+    char *ret = strdup(path);
+    char *s = strrchr(ret, '/');
+    /* set the part after the / to null */
+    if(s) *(s + 1) = '\0';
+    return ret;
+}
+
 /* true if the basename has an extension */
 BOOL hasExtension(const char *const path){
     const char *b = strrchr(path, '/');
@@ -54,4 +63,28 @@ BOOL fileExists(const char *const path){
     } else {
         return TRUE;
     }
+}
+
+/* replaces the basename without extension */
+char *replaceBasename(const char *const path, const char *const basename){
+    char *dname, *ext, *ret;
+    size_t dnamelen, extlen, basenamelen;
+
+    dname = xdirname(path);
+    ext = xextension(path);
+
+    dnamelen    = strlen(dname);
+    extlen      = strlen(ext);
+    basenamelen = strlen(basename);
+
+    ret = malloc((dnamelen + extlen + basenamelen + 1) * sizeof(char));
+    memset(ret, 0, (dnamelen + extlen + basenamelen + 1) * sizeof(char));
+    strcat(ret, dname);
+    strcat(ret, basename);
+    strcat(ret, ext);
+
+    free(ext);
+    free(dname);
+
+    return ret;
 }
